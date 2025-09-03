@@ -2,6 +2,8 @@ import { connectToDatabase } from "@/lib/db";
 import User from "@/model/User.model";
 import { NextResponse } from "next/server";
 
+
+
 export async function POST(request) {
   try {
     const { email, password } = await request.json();
@@ -10,6 +12,9 @@ export async function POST(request) {
     }
 
     await connectToDatabase();
+
+
+
     const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
     if (existingUser) {
       return NextResponse.json({ error: "User already exists" }, { status: 400 });
@@ -17,11 +22,13 @@ export async function POST(request) {
 
     const user = await User.create({
       email: email.trim().toLowerCase(),
-      password, // Will be hashed automatically by pre-save hook
+      password, 
     });
 
     return NextResponse.json({ message: "User registered successfully", userId: user._id }, { status: 201 });
-  } catch (err) {
+  } 
+  
+  catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }

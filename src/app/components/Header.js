@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { Home, User } from "lucide-react";
+import { Home, User, Menu } from "lucide-react";
+import { useState } from "react";
 import { useNotification } from "./Notification";
 
 export default function Header() {
   const { data: session } = useSession();
   const { showNotification } = useNotification();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -19,83 +21,129 @@ export default function Header() {
   };
 
   return (
-    <div className="navbar bg-base-300 sticky top-0 z-40">
-      <div className="container mx-auto">
-        <div className="flex-1 px-2 lg:flex-none">
-          <Link
-            href="/"
-            className="btn btn-ghost text-xl gap-2 normal-case font-bold"
-            prefetch={true}
-            onClick={() =>
-              showNotification("Welcome to ImageKit ReelsPro", "info")
-            }
-          >
-            <Home className="w-5 h-5" />
-           Kamwale
-          </Link>
-        </div>
-        <div className="flex flex-1 justify-end px-2">
-          <div className="flex items-stretch gap-2">
-            <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-circle"
-              >
-                <User className="w-5 h-5" />
-              </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content z-[1] shadow-lg bg-base-100 rounded-box w-64 mt-4 py-2"
-              >
-                {session ? (
-                  <>
-                    <li className="px-4 py-1">
-                      <span className="text-sm opacity-70">
-                        {session.user?.email?.split("@")[0]}
-                      </span>
-                    </li>
-                    <div className="divider my-1"></div>
+    <header className="sticky top-0 z-50 w-full bg-base-300/80 backdrop-blur-md shadow-md">
+      <div className="container mx-auto flex items-center justify-between px-4 py-3 md:py-4">
+        {/* Left - Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-xl font-bold btn btn-ghost"
+          prefetch={true}
+          onClick={() =>
+            showNotification("Welcome to ImageKit ReelsPro", "info")
+          }
+        >
+          <Home className="w-5 h-5" />
+          <span className="hidden sm:inline">Kamwale</span>
+        </Link>
 
-                    <li>
-                      <Link
-                        href="/upload"
-                        className="px-4 py-2 hover:bg-base-200 block w-full"
-                        onClick={() =>
-                          showNotification("Welcome to Admin Dashboard", "info")
-                        }
-                      >
-                        Video Upload
-                      </Link>
-                    </li>
+     
+        <nav className="hidden md:flex items-center gap-4">
+          {session ? (
+            <>
+              <Link
+                href="/upload"
+                className="px-4 py-2 rounded-lg hover:bg-base-200 transition"
+                onClick={() =>
+                  showNotification("Welcome to Admin Dashboard", "info")
+                }
+              >
+                Video Upload
+              </Link>
 
-                    <li>
-                      <button
-                        onClick={handleSignOut}
-                        className="px-4 py-2 text-error hover:bg-base-200 w-full text-left"
-                      >
-                        Sign Out
-                      </button>
-                    </li>
-                  </>
+              <button
+                onClick={handleSignOut}
+                className="px-4 py-2 rounded-lg text-error hover:bg-base-200 transition"
+              >
+                Sign Out
+              </button>
+
+              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-base-200">
+                {session.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt="user"
+                    className="w-7 h-7 rounded-full border"
+                  />
                 ) : (
-                  <li>
-                    <Link
-                      href="/login"
-                      className="px-4 py-2 hover:bg-base-200 block w-full"
-                      onClick={() =>
-                        showNotification("Please sign in to continue", "info")
-                      }
-                    >
-                      Login
-                    </Link>
-                  </li>
+                  <User className="w-5 h-5" />
                 )}
-              </ul>
-            </div>
-          </div>
-        </div>
+                <span className="text-sm">
+                  {session.user?.email?.split("@")[0]}
+                </span>
+              </div>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-lg hover:bg-base-200 transition"
+              onClick={() =>
+                showNotification("Please sign in to continue", "info")
+              }
+            >
+              Login
+            </Link>
+          )}
+        </nav>
+
+       
+        <button
+          className="md:hidden btn btn-ghost btn-circle"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
       </div>
-    </div>
+
+    
+      {menuOpen && (
+        <div className="md:hidden bg-base-100 shadow-lg border-t animate-slide-down">
+          <ul className="flex flex-col gap-1 py-2 px-4">
+            {session ? (
+              <>
+                <li className="text-sm opacity-70">
+                  {session.user?.email?.split("@")[0]}
+                </li>
+                <li>
+                  <Link
+                    href="/upload"
+                    className="block px-4 py-2 rounded-lg hover:bg-base-200"
+                    onClick={() => {
+                      showNotification("Welcome to Admin Dashboard", "info");
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Video Upload
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 rounded-lg text-error hover:bg-base-200"
+                  >
+                    Sign Out
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link
+                  href="/login"
+                  className="block px-4 py-2 rounded-lg hover:bg-base-200"
+                  onClick={() => {
+                    showNotification("Please sign in to continue", "info");
+                    setMenuOpen(false);
+                  }}
+                >
+                  Login
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+    </header>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -57,7 +58,7 @@ function RegisterPage() {
   };
 
   return (
-    <div className="mt-[300px] flex items-center justify-center min-h-screen">
+    <div className=" flex items-center justify-center min-h-screen">
   <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
      <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
     welcome to Kamwale User
@@ -110,9 +111,9 @@ function RegisterPage() {
     <div className="mt-6 text-center">
       <p className="text-sm text-gray-600">
         Already have an account?{" "}
-        <a href="/login" className="text-blue-600 font-semibold hover:underline">
+        <Link href="/login" className="text-blue-600 font-semibold hover:underline">
           Login
-        </a>
+        </Link>
       </p>
     </div>
   </div>

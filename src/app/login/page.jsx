@@ -2,7 +2,7 @@
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import Link from "next/link";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,7 +55,16 @@ export default function LoginPage() {
             Login
           </button>
         </form>
+         <div className="mt-6 text-center">
+      <p className="text-sm text-gray-600">
+       Create a new account?{" "}
+        <Link href="/register" className="text-blue-600 font-semibold hover:underline">
+         Register
+        </Link>
+      </p>
+    </div>
       </div>
+      
     </div>
   );
 }
