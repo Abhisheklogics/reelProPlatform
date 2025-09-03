@@ -1,171 +1,128 @@
 "use client";
 import { useState } from "react";
-import { Upload, FileVideo, Image as ImageIcon } from "lucide-react";
+import FileUpload from "./FileUpload"; // tumhare upar ka FileUpload component
 
 export default function VideoUploadForm() {
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    controls: true,
-    quality: 100,
-  });
-  const [videoFile, setVideoFile] = useState(null);
-  const [thumbnailFile, setThumbnailFile] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [quality, setQuality] = useState(100);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+  const handleUploadSuccess = (res) => {
+    console.log("Video uploaded:", res);
+    setVideoUrl(res.url); // ImageKit URL
+    setMessage("✅ Video uploaded to ImageKit!");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!videoUrl) {
+      setMessage("❌ Please upload a video first!");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
     try {
-      const videoUrl = "/uploads/" + videoFile?.name;
-      const thumbnailUrl = "/uploads/" + thumbnailFile?.name;
-
       const res = await fetch("/api/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
+          title,
+          description,
           videoUrl,
-          thumbnailUrl,
-          transformation: { quality: formData.quality },
+          controls: true,
+          transformation: { quality },
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
+      if (!res.ok) throw new Error(data.error || "Failed to save video");
 
-      setMessage("✅ Video uploaded successfully!");
-    } catch (error) {
-      setMessage("❌ " + error.message);
+      setMessage("✅ Video info saved successfully!");
+      setTitle("");
+      setDescription("");
+      setQuality(100);
+      setVideoUrl("");
+      setProgress(0);
+    } catch (err) {
+      setMessage("❌ " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 px-4">
-      <div className="bg-base-100 shadow-lg rounded-2xl p-6 md:p-8 border border-base-300">
-        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-          <Upload className="w-6 h-6 text-blue-600" /> Upload Video
-        </h1>
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow rounded-xl">
+      <h1 className="text-2xl font-bold mb-4">Upload Video</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Title */}
-          <div>
-            <label className="block font-semibold mb-1">Title</label>
-            <input
-              type="text"
-              name="title"
-              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              placeholder="Enter video title"
-            />
-          </div>
+      <FileUpload
+        fileType="video"
+        onProgress={(percent) => setProgress(percent)}
+        onSuccess={handleUploadSuccess}
+      />
 
-          {/* Description */}
-          <div>
-            <label className="block font-semibold mb-1">Description</label>
-            <textarea
-              name="description"
-              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              rows="3"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              placeholder="Write a short description..."
-            />
-          </div>
+      {progress > 0 && progress < 100 && (
+        <p>Uploading: {progress}%</p>
+      )}
 
-          {/* Video File */}
-          <div>
-            <label className="block font-semibold mb-1">Video File</label>
-            <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-base-200 transition">
-              <input
-                type="file"
-                accept="video/*"
-                className="hidden"
-                id="videoFile"
-                onChange={(e) => setVideoFile(e.target.files[0])}
-                required
-              />
-              <label htmlFor="videoFile" className="cursor-pointer flex flex-col items-center gap-2">
-                <FileVideo className="w-8 h-8 text-blue-600" />
-                <span className="text-sm text-gray-600">
-                  {videoFile ? videoFile.name : "Click to upload or drag & drop"}
-                </span>
-              </label>
-            </div>
-            {videoFile && (
-              <video
-                src={URL.createObjectURL(videoFile)}
-                controls
-                className="mt-3 rounded-lg max-h-48 w-full object-cover"
-              />
-            )}
-          </div>
+      {videoUrl && (
+        <video src={videoUrl} controls className="w-full mt-4 rounded" />
+      )}
 
-         
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div>
+          <label className="block font-semibold">Title</label>
+          <input
+            type="text"
+            className="w-full border p-2 rounded"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
 
-          {/* Controls */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="controls"
-              checked={formData.controls}
-              onChange={handleChange}
-              className="w-4 h-4"
-            />
-            <label>Show Controls</label>
-          </div>
+        <div>
+          <label className="block font-semibold">Description</label>
+          <textarea
+            className="w-full border p-2 rounded"
+            rows="3"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+        </div>
 
-          {/* Quality */}
-          <div>
-            <label className="block font-semibold mb-1">Quality (1 - 100)</label>
-            <input
-              type="number"
-              name="quality"
-              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              min="1"
-              max="100"
-              value={formData.quality}
-              onChange={handleChange}
-            />
-          </div>
+        <div>
+          <label className="block font-semibold">Quality (1-100)</label>
+          <input
+            type="number"
+            className="w-full border p-2 rounded"
+            min="1"
+            max="100"
+            value={quality}
+            onChange={(e) => setQuality(e.target.value)}
+          />
+        </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            {loading ? "Uploading..." : "Upload Video"}
-          </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
+          {loading ? "Saving..." : "Save Video Info"}
+        </button>
+      </form>
 
-          {/* Message */}
-          {message && (
-            <p
-              className={`mt-4 text-center font-medium ${
-                message.startsWith("✅") ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {message}
-            </p>
-          )}
-        </form>
-      </div>
+      {message && (
+        <p className={`mt-4 font-medium ${message.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }

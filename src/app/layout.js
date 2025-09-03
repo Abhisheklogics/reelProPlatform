@@ -21,13 +21,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Welecome to Kamwale",
-  description: "",
+  title: "Kamwale – Showcase Your Talent, Skills & Creativity",
+  description: "Kamwale is a platform where anyone can upload and share their work – videos, projects, skills, and more. Showcase your talent, connect with others, and grow your presence online.",
+  icons: {
+    icon: "/favicon.ico", 
+    shortcut: "/favicon.ico",
+  },
 };
+
 
 export default function RootLayout({children}) {
   return (
     <html lang="en">
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

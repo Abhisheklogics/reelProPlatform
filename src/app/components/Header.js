@@ -28,12 +28,10 @@ export default function Header() {
           href="/"
           className="flex items-center gap-2 text-xl font-bold btn btn-ghost"
           prefetch={true}
-          onClick={() =>
-            showNotification("Welcome to ImageKit ReelsPro", "info")
-          }
+      
         >
           <Home className="w-5 h-5" />
-          <span className="hidden sm:inline">Kamwale</span>
+          <span className="hidden sm:inline">Kaamwale</span>
         </Link>
 
      
@@ -47,12 +45,12 @@ export default function Header() {
                   showNotification("Welcome to Admin Dashboard", "info")
                 }
               >
-                Video Upload
+                Kaam Upload
               </Link>
 
               <button
                 onClick={handleSignOut}
-                className="px-4 py-2 rounded-lg text-error hover:bg-base-200 transition"
+                className="px-4 py-2 rounded-lg text-error  hover:bg-base-200 transition"
               >
                 Sign Out
               </button>
@@ -112,7 +110,7 @@ export default function Header() {
                       setMenuOpen(false);
                     }}
                   >
-                    Video Upload
+                    Kaam Upload
                   </Link>
                 </li>
                 <li>

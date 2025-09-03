@@ -1,14 +1,10 @@
-"use client"; 
+"use client"; // This component must be a client component
 
 import {
-  ImageKitAbortError,
-  ImageKitInvalidRequestError,
-  ImageKitServerError,
-  ImageKitUploadNetworkError,
-  upload
+
+  upload,
 } from "@imagekit/next";
 import { useRef, useState } from "react";
-
 
 
 const FileUpload = ({ onSuccess, onProgress, fileType }) => {
@@ -30,39 +26,45 @@ const FileUpload = ({ onSuccess, onProgress, fileType }) => {
   };
 
   const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    if (!file || !validateFile(file)) return;
+  setUploading(true);
+  setError(null);
 
-    setUploading(true);
-    setError(null);
+  try {
+    // 1️⃣ Get auth parameters from backend
+    const authRes = await fetch("/api/auth/upload-file");
+    const auth = await authRes.json();
 
-    try {
-      const authRes = await fetch("/api/auth/upload-file");
-      const auth = await authRes.json();
-
-      const res = await upload({
-        file,
-        fileName: file.name,
-        publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY,
-        signature: auth.signature,
-        expire: auth.expire,
-        token: auth.token,
-        onProgress: (event) => {
-          if(event.lengthComputable && onProgress){
-            const percent = (event.loaded / event.total) * 100;
-            onProgress(Math.round(percent))
-          }
-        },
-        
-      });
-      onSuccess(res)
-    } catch (error) {
-        console.error("Upload failed", error)
-    } finally {
-        setUploading(false)
+    if (!auth.token || !auth.signature || !auth.expire) {
+      throw new Error("Auth parameters missing from server");
     }
-  };
+
+    // 2️⃣ Upload to ImageKit
+    const res = await upload({
+      file,
+      fileName: file.name,
+      publicKey: auth.publicKey,
+      token: auth.token,
+      signature: auth.signature,
+      expire: auth.expire,
+      onProgress: (event) => {
+        if (event.lengthComputable && onProgress) {
+          const percent = (event.loaded / event.total) * 100;
+          onProgress(Math.round(percent));
+        }
+      },
+    });
+
+    onSuccess(res);
+  } catch (err) {
+    console.error("Upload failed", err);
+    setError(err.message);
+  } finally {
+    setUploading(false);
+  }
+};
 
   return (
     <>

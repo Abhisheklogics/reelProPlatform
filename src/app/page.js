@@ -1,11 +1,11 @@
 
-import Image from "next/image";
 
+import VideoReel from "./components/VideoComponent";
 
 export default function Home() {
   return (
    <>
-
+<VideoReel/>
    </>
   );
 }
